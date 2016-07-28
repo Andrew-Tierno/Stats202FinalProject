@@ -29,8 +29,9 @@ train <- trainMaster[sample(1:nrow(trainMaster), NUM_ENTRIES), ]
 folds <- sample(1:NUM_FOLDS, nrow(train), replace = T)
 train <- data.frame(train, folds)
 
-#N=20000, k=10, % Error=34.77%, total time = 8m58s, avg time = 54s
+#N=20000, k=10, % Error=34.77%, total time=8m58s, avg time=54s
 testBagging <- function() {
+  print("========Testing Bagging========", quote=F)
   totalError <- 0
   totalStartTime <- getCurrentTime()
   for (i in 1:NUM_FOLDS) {
@@ -47,14 +48,34 @@ testBagging <- function() {
   print(paste0("Average Percent Error: ", round(totalError/NUM_FOLDS, 2), "%"), quote=F)
 }
 
-#N=20000, k=10, % Error = 34.15, total time = 8m31s, avg time = 51s
+#N=20000, k=10, % Error=34.15%, total time=8m31s, avg time=51s
 testRandomForest <- function(m = sqrt(ncol(train) - 1)) {
+  print("========Testing Random Forest========", quote=F)
   totalError <- 0
   totalStartTime <- getCurrentTime()
   for (i in 1:NUM_FOLDS) {
     startTime <- getCurrentTime()
-    bag.fit <- randomForest(relevance ~ ., data=train[train$folds != i, ], mtry=m, importance=T)
-    predictedVals <- predict(bag.fit, train[train$folds == i, ])
+    rf.fit <- randomForest(relevance ~ ., data=train[train$folds != i, ], mtry=m, importance=T)
+    predictedVals <- predict(rf.fit, train[train$folds == i, ])
+    pctError <- round((1 - sum(predictedVals == train[train$folds == i, "relevance"]) / length(predictedVals)) * 100, 2)
+    totalError <- totalError + pctError
+    printElapsedTime(startTime, paste0("Elapsed Time for Fold ", i, ": "))
+    print(paste0("Percent Error for Fold ", i, ": ", pctError, "%"), quote=F)
+  }
+  printElapsedTime(totalStartTime, "Total Elapsed Time: ")
+  print(paste0("Average Elapsed Time: ", getElapsedTime(totalStartTime) / NUM_FOLDS, "s"), quote=F)
+  print(paste0("Average Percent Error: ", round(totalError/NUM_FOLDS, 2), "%"), quote=F)
+}
+
+#N=20000, k=10, % Error=34.75%, total time=7m51s, avg time=47s 
+testSVM <- function() {
+  print("========Testing SVM========", quote=F)
+  totalError <- 0
+  totalStartTime <- getCurrentTime()
+  for (i in 1:NUM_FOLDS) {
+    startTime <- getCurrentTime()
+    svm.fit <- svm(relevance ~ ., data=train[train$folds != i, ])
+    predictedVals <- predict(svm.fit, train[train$folds == i, ])
     pctError <- round((1 - sum(predictedVals == train[train$folds == i, "relevance"]) / length(predictedVals)) * 100, 2)
     totalError <- totalError + pctError
     printElapsedTime(startTime, paste0("Elapsed Time for Fold ", i, ": "))
