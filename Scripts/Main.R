@@ -18,7 +18,7 @@ trainMaster$is_homepage <- as.factor(trainMaster$is_homepage)
 SEED <- 42
 #Number of entries to use from trainMaster, since trainMaster is
 #too large for experimenting.
-NUM_ENTRIES <- 15000
+NUM_ENTRIES <- 40000
 #Number of folds for k-folds CV. Each fold will contain
 #NUM_ENTRIES / NUM_FOLDS entries.
 NUM_FOLDS <- 10
@@ -92,6 +92,7 @@ testSVM <- function(costVal) {
   beep("complete")
 }
 
+#Minimum for cost=100 with % error of 32.44% on N=20000, k=10
 plotSVMCost <- function() {
   costs <- c(.1, .5, 1, 10, 25, 50, 75, 100, 200)
   out <- data.frame(cost=0, error=0)
@@ -110,8 +111,6 @@ plotSVMCost <- function() {
   beep("complete")
   return(out)
 }
-
-costPoints <- plotSVMCost()
 
 testPLSR <- function() {
   print("========Testing PLSR========", quote=F)
