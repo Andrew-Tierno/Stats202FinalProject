@@ -5,6 +5,9 @@ test <- read.csv("Data/test.csv")
 colnames(train)
 head(train)
 
+train$is_homepage <- as.logical(train$is_homepage)
+train$relevance <- as.logical(train$relevance)
+
 library(plyr)
 attach(train)
 length(url_id) #80046
@@ -39,3 +42,11 @@ quantile(sig5, probs=c(.50, .90, .99))
 #50% of values are <0, 90% are <18, and 99% are <293 (max 3645).
 #52165 observations (65.2%) have a sig6 that is zero.
 quantile(sig6, probs=c(.50, .90, .99)) 
+
+sum(is_homepage & relevance) / length(relevance) #13.08%
+sum(is_homepage & !relevance) / length(relevance) #13.81%
+sum(!is_homepage & relevance) / length(relevance) #30.63%
+sum(!is_homepage & !relevance) / length(relevance) #42.48%
+
+pca <- princomp(train)
+weightMat <- loadings(pca)
